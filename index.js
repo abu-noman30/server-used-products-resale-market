@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
 
 const port = process.env.PORT || 5000;
@@ -33,7 +33,15 @@ const collectionBrands = database.collection('brands');
 const collectionCars = database.collection('cars');
 // ----------------------------
 
-
+app.get('/category', async (req, res) => {
+	try {
+		const query = {};
+		const result = await collectionBrands.find(query).toArray();
+		res.send(result);
+	} catch (error) {
+		console.log(error);
+	}
+});
 // Test Route
 app.get('/', (req, res) => {
 	console.log('Server is running');
