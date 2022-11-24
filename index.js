@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 require('dotenv').config();
 
 const port = process.env.PORT || 5000;
@@ -39,6 +39,7 @@ app.put('/users', async (req, res) => {
 		console.log(usersData);
 		const query = { email: usersData.email };
 		const options = { upsert: true };
+
 		const updateDoc = {
 			$set: {
 				email: usersData.email,
@@ -63,21 +64,27 @@ app.get('/category', async (req, res) => {
 		console.log(error);
 	}
 });
+
+app.get('/category/:id', async (req, res) => {
+	try {
+		const id = req.params.id;
+		const query = { _id: ObjectId(id) };
+		const catagory = await brandsCollection.findOne(query);
+		const brand = catagory.brand_name;
+		const filter = { brand_name: brand };
+		const result = await carsCollection.find(filter).toArray();
+		// console.log(result);
+		res.send(result);
+	} catch (error) {
+		console.log(error);
+	}
+});
 // Test Route
 app.get('/', (req, res) => {
 	console.log('Server is running');
 	res.send('erver is running');
 });
 
-app.get('/category/:id', async (req, res) => {
-	try {
-		const query = { brand_name: req.params.id };
-		const result = await carsCollection.find(query).toArray();
-		res.send(result);
-	} catch (error) {
-		console.log(error);
-	}
-});
 // Server Listening
 app.listen(port, () => {
 	console.log(`Server is running on port:...${port}`);
