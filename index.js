@@ -32,6 +32,7 @@ const database = client.db('CarBazar');
 const brandsCollection = database.collection('brands');
 const carsCollection = database.collection('cars');
 const usersCollection = database.collection('users');
+const bookingsCollection = database.collection('bookings');
 // ----------------------------
 app.put('/users', async (req, res) => {
 	try {
@@ -74,6 +75,16 @@ app.get('/category/:id', async (req, res) => {
 		const filter = { brand_name: brand };
 		const result = await carsCollection.find(filter).toArray();
 		// console.log(result);
+		res.send(result);
+	} catch (error) {
+		console.log(error);
+	}
+});
+
+app.post('/booking', async (req, res) => {
+	try {
+		const bookingData = req.body;
+		const result = await bookingsCollection.insertOne(bookingData);
 		res.send(result);
 	} catch (error) {
 		console.log(error);
