@@ -29,14 +29,35 @@ async function runDB() {
 }
 runDB();
 const database = client.db('CarBazar');
-const collectionBrands = database.collection('brands');
-const collectionCars = database.collection('cars');
+const brandsCollection = database.collection('brands');
+const carsCollection = database.collection('cars');
+const usersCollection = database.collection('users');
 // ----------------------------
+app.put('/users', async (req, res) => {
+	try {
+		const usersData = req.body;
+		console.log(usersData);
+		const query = { email: usersData.email };
+		const options = { upsert: true };
+		const updateDoc = {
+			$set: {
+				email: usersData.email,
+				name: usersData.name,
+				accountType: usersData.accountType
+			}
+		};
+		const result = await usersCollection.updateOne(query, updateDoc, options);
+		console.log(result);
 
+		res.send(result);
+	} catch (error) {
+		console.error(error.stack);
+	}
+});
 app.get('/category', async (req, res) => {
 	try {
 		const query = {};
-		const result = await collectionBrands.find(query).toArray();
+		const result = await brandsCollection.find(query).toArray();
 		res.send(result);
 	} catch (error) {
 		console.log(error);
@@ -48,6 +69,15 @@ app.get('/', (req, res) => {
 	res.send('erver is running');
 });
 
+app.get('/category/:id', async (req, res) => {
+	try {
+		const query = { brand_name: req.params.id };
+		const result = await carsCollection.find(query).toArray();
+		res.send(result);
+	} catch (error) {
+		console.log(error);
+	}
+});
 // Server Listening
 app.listen(port, () => {
 	console.log(`Server is running on port:...${port}`);
