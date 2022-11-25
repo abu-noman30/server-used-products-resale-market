@@ -57,6 +57,64 @@ app.put('/users', async (req, res) => {
 	}
 });
 
+app.get('/users', async (req, res) => {
+	try {
+		const sellers = { accountType: 'seller' };
+		const buyers = { accountType: 'buyer' };
+		const sellersData = await usersCollection.find(sellers).toArray();
+		const buyersData = await usersCollection.find(buyers).toArray();
+		res.send({ sellersData, buyersData });
+	} catch (error) {
+		console.error(error.stack);
+	}
+});
+
+app.get('/users/verified', async (req, res) => {
+	try {
+		const email = req.query.email;
+		const query = { email: email };
+		const verifiedSeller = await usersCollection.findOne(query);
+		res.send(verifiedSeller);
+	} catch (error) {
+		console.error(error.stack);
+	}
+});
+// Seller verification update route
+app.patch('/users/:id', async (req, res) => {
+	try {
+		const id = req.params.id;
+		const verification = req.body.verification;
+		console.log(id, verification);
+		const filter = { _id: ObjectId(id) };
+		const options = { upsert: true };
+
+		const updateDoc = {
+			$set: {
+				verification: verification
+			}
+		};
+		const result = await usersCollection.updateOne(filter, updateDoc, options);
+		res.send(result);
+	} catch (error) {
+		console.error(error.stack);
+	}
+});
+
+// User delete route
+app.delete('/users/:id', async (req, res) => {
+	try {
+		const id = req.params.id;
+		const query = { _id: ObjectId(id) };
+		// console.log(query);
+		if (query) {
+			const result = await usersCollection.deleteOne(query);
+			res.send(result);
+		}
+	} catch (error) {
+		console.log(error);
+	}
+});
+
 // User's Role Check Route (Admin / Buyer/ Seller)
 app.get('/users/role', async function (req, res) {
 	try {
