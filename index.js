@@ -197,6 +197,19 @@ app.post('/add-product', async (req, res) => {
 		console.log(error);
 	}
 });
+
+app.get('/products', async (req, res) => {
+	try {
+		const email = req.query.email;
+		const query = {
+			'seller_info.email': email
+		};
+		const result = await carsCollection.find(query).toArray();
+		res.send(result);
+	} catch (error) {
+		console.log(error);
+	}
+});
 // Test Route
 app.get('/', (req, res) => {
 	console.log('Server is running');
