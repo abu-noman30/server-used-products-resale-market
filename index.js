@@ -164,6 +164,30 @@ app.post('/booking', async (req, res) => {
 	}
 });
 
+app.get('/booking', async (req, res) => {
+	try {
+		const email = req.query.email;
+		const query = { 'buyerInfo.email': email };
+		const result = await bookingsCollection.find(query).toArray();
+		res.send(result);
+	} catch (error) {
+		console.log(error);
+	}
+});
+
+app.delete('/booking/:id', async (req, res) => {
+	try {
+		const id = req.params.id;
+		const query = { _id: ObjectId(id) };
+		if (query) {
+			const result = await bookingsCollection.deleteOne(query);
+			res.send(result);
+		}
+	} catch (error) {
+		console.log(error);
+	}
+});
+
 app.post('/add-product', async (req, res) => {
 	try {
 		const productData = req.body;
