@@ -56,6 +56,21 @@ app.put('/users', async (req, res) => {
 		console.error(error.stack);
 	}
 });
+
+// User's Role Check Route (Admin / Buyer/ Seller)
+app.get('/users/role', async function (req, res) {
+	try {
+		const email = req.query.email;
+		const query = { email: email };
+		const result = await usersCollection.findOne(query);
+
+		// result{email: "email", name: "name", role: "admin/buyer/seller"}
+		res.send(result);
+	} catch (error) {
+		console.log(error.stack);
+	}
+});
+
 app.get('/category', async (req, res) => {
 	try {
 		const query = {};
@@ -90,6 +105,8 @@ app.post('/booking', async (req, res) => {
 		console.log(error);
 	}
 });
+
+
 // Test Route
 app.get('/', (req, res) => {
 	console.log('Server is running');
