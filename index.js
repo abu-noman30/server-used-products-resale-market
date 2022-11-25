@@ -106,7 +106,15 @@ app.post('/booking', async (req, res) => {
 	}
 });
 
-
+app.post('/add-product', async (req, res) => {
+	try {
+		const productData = req.body;
+		const result = await carsCollection.insertOne(productData);
+		res.send(result);
+	} catch (error) {
+		console.log(error);
+	}
+});
 // Test Route
 app.get('/', (req, res) => {
 	console.log('Server is running');
