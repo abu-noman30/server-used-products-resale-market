@@ -211,6 +211,16 @@ app.get('/products', async (req, res) => {
 		console.log(error);
 	}
 });
+app.delete('/products/:id', async (req, res) => {
+	try {
+		const id = req.params.id;
+		const query = { _id: ObjectId(id) };
+		const result = await carsCollection.deleteOne(query);
+		res.send(result);
+	} catch (error) {
+		console.log(error);
+	}
+});
 
 app.post('/reported-items', async (req, res) => {
 	try {
