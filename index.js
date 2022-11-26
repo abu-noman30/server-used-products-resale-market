@@ -33,6 +33,7 @@ const brandsCollection = database.collection('brands');
 const carsCollection = database.collection('cars');
 const usersCollection = database.collection('users');
 const bookingsCollection = database.collection('bookings');
+const reportedItemsCollection = database.collection('reportedItems');
 // ----------------------------
 app.put('/users', async (req, res) => {
 	try {
@@ -210,6 +211,26 @@ app.get('/products', async (req, res) => {
 		console.log(error);
 	}
 });
+
+app.post('/reported-items', async (req, res) => {
+	try {
+		const reportedItem = req.body;
+		const result = await reportedItemsCollection.insertOne(reportedItem);
+		res.send(result);
+	} catch (error) {
+		console.log(error);
+	}
+});
+app.post('/reported-items', async (req, res) => {
+	try {
+		const reportedItem = req.body;
+		const result = await reportedItemsCollection.insertOne(reportedItem);
+		res.send(result);
+	} catch (error) {
+		console.log(error);
+	}
+});
+
 // Test Route
 app.get('/', (req, res) => {
 	console.log('Server is running');
