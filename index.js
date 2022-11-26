@@ -176,6 +176,17 @@ app.get('/booking', async (req, res) => {
 	}
 });
 
+app.get('/booking/:id', async (req, res) => {
+	try {
+		const id = req.params.id;
+		const query = { _id: ObjectId(id) };
+		const result = await bookingsCollection.findOne(query);
+		res.send(result);
+	} catch (error) {
+		console.log(error);
+	}
+});
+
 app.delete('/booking/:id', async (req, res) => {
 	try {
 		const id = req.params.id;
