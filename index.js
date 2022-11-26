@@ -309,9 +309,17 @@ app.post('/payments', async (req, res) => {
 				paymentStatus: 'paid'
 			}
 		};
-		// console.log(orderId);
 		const updateResult = await bookingsCollection.updateOne(query, updateDoc);
-		res.send({ result, updateResult });
+
+		const productId = paymentData.orderData.carInfo._id;
+		const filter = { _id: ObjectId(productId) };
+		const updateProduct = {
+			$set: {
+				sales_status: 'sold'
+			}
+		};
+		const updateProductResult = await carsCollection.updateOne(filter, updateProduct);
+		res.send({ result, updateResult, updateProductResult });
 	} catch (error) {
 		console.error(error.stack);
 	}
