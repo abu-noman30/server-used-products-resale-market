@@ -221,11 +221,28 @@ app.post('/reported-items', async (req, res) => {
 		console.log(error);
 	}
 });
-app.post('/reported-items', async (req, res) => {
+app.get('/reported-items', async (req, res) => {
 	try {
-		const reportedItem = req.body;
-		const result = await reportedItemsCollection.insertOne(reportedItem);
+		const query = {};
+		const result = await reportedItemsCollection.find(query).toArray();
 		res.send(result);
+	} catch (error) {
+		console.log(error);
+	}
+});
+// Delete Product by report Items ID with query to product ID
+app.delete('/reported-items/:id', async (req, res) => {
+	try {
+		const reportId = req.params.id;
+		const query = { _id: ObjectId(reportId) };
+		const result = await reportedItemsCollection.findOne(query);
+		const carId = result.car._id;
+		const filter = { _id: ObjectId(carId) };
+		const findItem = await carsCollection.findOne(filter);
+		console.log(findItem);
+		const deleteItemCar = await carsCollection.deleteOne(filter);
+		const deleteItemReport = await reportedItemsCollection.deleteOne(query);
+		res.send({ deleteItemReport, deleteItemCar });
 	} catch (error) {
 		console.log(error);
 	}
