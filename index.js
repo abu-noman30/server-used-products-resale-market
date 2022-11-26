@@ -58,6 +58,8 @@ const carsCollection = database.collection('cars');
 const usersCollection = database.collection('users');
 const bookingsCollection = database.collection('bookings');
 const reportedItemsCollection = database.collection('reportedItems');
+const paymentsCollection = database.collection('payments');
+const advertisesCollection = database.collection('advertises');
 // ----------------------------
 app.put('/users', async (req, res) => {
 	try {
@@ -293,6 +295,37 @@ app.delete('/reported-items/:id', async (req, res) => {
 	}
 });
 
+app.post('/payments', async (req, res) => {
+	try {
+		const paymentData = req.body;
+		// console.log(paymentData);
+		const result = await paymentsCollection.insertOne(paymentData);
+
+		const orderId = paymentData.orderData._id;
+		const query = { _id: ObjectId(orderId) };
+
+		const updateDoc = {
+			$set: {
+				paymentStatus: 'paid'
+			}
+		};
+		// console.log(orderId);
+		const updateResult = await bookingsCollection.updateOne(query, updateDoc);
+		res.send({ result, updateResult });
+	} catch (error) {
+		console.error(error.stack);
+	}
+});
+
+app.post('/advertise', async (req, res) => {
+	try {
+		const advertiseData = req.body;
+		const result = await advertisesCollection.insertOne(advertiseData);
+		res.send(result);
+	} catch (error) {
+		console.log(error);
+	}
+});
 // Test Route
 app.get('/', (req, res) => {
 	console.log('Server is running');
