@@ -68,6 +68,25 @@ function verifyToken(req, res, next) {
 	}
 }
 
+async function verifyAdmin(req, res, next) {
+	try {
+		const decodedEmail = req.decodedData.email;
+		// console.log(decodedEmail);
+		const query = { email: decodedEmail };
+		const user = await usersCollection.findOne(query);
+
+		if (!user?.role === 'admin') {
+			return res.status(403).send({
+				error: 'Forbidden Access',
+				message: 'You are not an Admin'
+			});
+		}
+		next();
+	} catch (error) {
+		console.log(error.stack);
+	}
+}
+
 // Payment Gateway - Stripe API
 // ----------------------------
 app.post('/create-payment-intent', async (req, res) => {
@@ -163,7 +182,7 @@ app.get('/users/verified', async (req, res) => {
 	}
 });
 // Seller verification update route
-app.patch('/users/:id', async (req, res) => {
+app.patch('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
 	try {
 		const id = req.params.id;
 		const verification = req.body.verification;
@@ -184,7 +203,7 @@ app.patch('/users/:id', async (req, res) => {
 });
 
 // User delete route
-app.delete('/users/:id', async (req, res) => {
+app.delete('/users/:id', verifyToken, verifyAdmin, async (req, res) => {
 	try {
 		const id = req.params.id;
 		const query = { _id: ObjectId(id) };
@@ -247,7 +266,7 @@ app.post('/booking', async (req, res) => {
 	}
 });
 
-app.get('/booking', async (req, res) => {
+app.get('/booking', verifyToken, async (req, res) => {
 	try {
 		const email = req.query.email;
 		const query = { 'buyerInfo.email': email };
@@ -282,7 +301,7 @@ app.delete('/booking/:id', async (req, res) => {
 	}
 });
 
-app.post('/add-product', async (req, res) => {
+app.post('/add-product', verifyToken, async (req, res) => {
 	try {
 		const productData = req.body;
 		const result = await carsCollection.insertOne(productData);
@@ -292,7 +311,7 @@ app.post('/add-product', async (req, res) => {
 	}
 });
 
-app.get('/products', async (req, res) => {
+app.get('/products', verifyToken, async (req, res) => {
 	try {
 		const email = req.query.email;
 		const query = {
@@ -304,11 +323,14 @@ app.get('/products', async (req, res) => {
 		console.log(error);
 	}
 });
-app.delete('/products/:id', async (req, res) => {
+app.delete('/products/:id', verifyToken, async (req, res) => {
 	try {
 		const id = req.params.id;
 		const query = { _id: ObjectId(id) };
 		const result = await carsCollection.deleteOne(query);
+
+		const filter = { 'product._id': id };
+		await advertisesCollection.deleteOne(filter);
 		res.send(result);
 	} catch (error) {
 		console.log(error);
@@ -324,7 +346,7 @@ app.post('/reported-items', async (req, res) => {
 		console.log(error);
 	}
 });
-app.get('/reported-items', async (req, res) => {
+app.get('/reported-items', verifyToken, async (req, res) => {
 	try {
 		const query = {};
 		const result = await reportedItemsCollection.find(query).toArray();
@@ -334,24 +356,29 @@ app.get('/reported-items', async (req, res) => {
 	}
 });
 // Delete Product by report Items ID with query to product ID
-app.delete('/reported-items/:id', async (req, res) => {
+app.delete('/reported-items/:id', verifyToken, verifyAdmin, async (req, res) => {
 	try {
 		const reportId = req.params.id;
 		const query = { _id: ObjectId(reportId) };
 		const result = await reportedItemsCollection.findOne(query);
 		const carId = result.car._id;
+		console.log('c', carId);
 		const filter = { _id: ObjectId(carId) };
 		const findItem = await carsCollection.findOne(filter);
 		console.log(findItem);
 		const deleteItemCar = await carsCollection.deleteOne(filter);
 		const deleteItemReport = await reportedItemsCollection.deleteOne(query);
+
+		const filterAdd = { 'product._id': carId };
+		await advertisesCollection.deleteOne(filterAdd);
+
 		res.send({ deleteItemReport, deleteItemCar });
 	} catch (error) {
 		console.log(error);
 	}
 });
 
-app.post('/payments', async (req, res) => {
+app.post('/payments', verifyToken, async (req, res) => {
 	try {
 		const paymentData = req.body;
 		const carId = paymentData.orderData.carInfo._id;
@@ -397,7 +424,7 @@ app.post('/payments', async (req, res) => {
 	}
 });
 
-app.post('/advertise', async (req, res) => {
+app.post('/advertise', verifyToken, async (req, res) => {
 	try {
 		const advertiseData = req.body;
 		const id = advertiseData.product._id;
